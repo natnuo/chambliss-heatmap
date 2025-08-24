@@ -1,0 +1,34 @@
+---
+alwaysApply: true
+---
+
+# Chambliss Grandslam Heatmap Project Structure
+
+This is a single-page HTML application that creates an interactive tennis court heatmap visualization.
+
+## Core Files
+
+- [index.html](mdc:index.html) - Main application file containing HTML, CSS, and JavaScript
+- [project-specs.md](mdc:project-specs.md) - Original project specifications and requirements
+
+## Project Architecture
+
+The application is built as a self-contained HTML file with:
+- Canvas-based rendering for pixel-perfect heatmap visualization
+- Object-oriented JavaScript with a `HeatmapApp` class
+- Inline CSS for modern, responsive styling
+- No external dependencies - runs in any modern browser
+
+## Key Components
+
+1. **Canvas Rendering**: 600x600px canvas with 3x3 grid (180px per cell)
+2. **Heatmap Logic**: Pixel-level heat tracking with radial distribution
+3. **Blur Effects**: Real-time blur application for smooth color transitions
+4. **User Controls**: Intensity adjustment and clear functionality
+
+## Design Principles
+
+- White background with black 2-pixel grid lines
+- Red heat gradient that intensifies with clicks
+- Smooth, weather map-like blur transitions
+- Individual pixel granularity within grid cells

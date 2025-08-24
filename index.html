@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chambliss Grandslam Heatmap</title>
+    <style>
+      body {
+        margin-left: 200px;
+        margin-right: 200px;
+        padding: 20px;
+        background-color: white;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        min-height: 100vh;
+        gap: 20px;
+      }
+
+      #left-side {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: baseline;
+        justify-content: space-between;
+        padding: 20px;
+        height: 1024px;
+      }
+
+      #right-side {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: space-between;
+        padding: 20px;
+        height: 1024px;
+      }
+
+      #middle-side {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px;
+        height: 1024px;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+      }
+
+      #canvas-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      #heatmap-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        overflow: hidden;
+        justify-content: space-between;
+        height: 500px;
+      }
+
+      #heatmap-canvas {
+        display: block;
+        cursor: crosshair;
+      }
+
+      .controls {
+        margin-top: 20px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      .info {
+        margin-top: 15px;
+        color: #666;
+        text-align: center;
+        max-width: 600px;
+        line-height: 1.4;
+      }
+
+      .intensity-display {
+        color: #333;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="left-side">
+      <div style="display: flex; align-items: center; gap: 10px">
+        <img src="softball.png" id="logo-image" height="64" />
+        <span
+          style="font-size: 40px; font-weight: bold; text-decoration: underline"
+          >Yvette C.</span
+        >
+        <img src="softball.png" id="logo-image" height="64" />
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <span style="font-size: 40px; font-weight: bold"
+          >BA: <span style="font-weight: normal">.689</span></span
+        ></span>
+        <span style="font-size: 40px; font-weight: bold"
+          >AB: <span style="font-weight: normal">74</span></span
+        ></span>
+        <span style="font-size: 40px; font-weight: bold"
+          >H: <span style="font-weight: normal">51</span></span
+        ></span>
+        <span style="font-size: 40px; font-weight: bold"
+          >RBI: <span style="font-weight: normal">15</span></span
+        ></span>
+        <span style="font-size: 40px; font-weight: bold"
+          >BB: <span style="font-weight: normal">3</span></span
+        ></span>
+        <span style="font-size: 40px; font-weight: bold"
+          >S/M: <span style="font-weight: normal">5</span></span
+        ></span>
+        <span style="font-size: 40px; font-weight: bold"
+          >K: <span style="font-weight: normal">5</span></span
+        ></span>
+      </div>
+
+      <div style="display: flex; flex-direction: row; gap: 30px">
+        <div
+          style="
+            height: 400px;
+            width: 50px;
+            background-image: linear-gradient(to bottom, #f33f, #ee3f, #3eef);
+            border-radius: 10px;
+          "
+        ></div>
+        <div style="display: flex; flex-direction: column; justify-content: space-between; height: 400px;">
+          <span style="font-size: 30px; font-weight: normal">
+            Hot Zone
+          </span>
+          <span style="font-size: 30px; font-weight: normal">
+            Cold Zone
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div id="middle-side" style="margin-top: 50px;">
+      <div id="canvas-container" style="height: 500px;">
+        <!-- For lefty version, batter image must be on other side, among some other changes -->
+        <img
+          src="batter-large.png"
+          id="batter-image"
+          height="500"
+          style="z-index: 1000; pointer-events: none"
+        />
+        <div
+          id="heatmap-container"
+          style="margin-left: -150px; margin-right: -50px"
+        >
+          <canvas id="heatmap-canvas" width="600" height="500"></canvas>
+          <img
+            src="home-plate.png"
+            id="home-plate-image"
+            width="200"
+            style="z-index: 1000; pointer-events: none; margin-top: -150px"
+          />
+        </div>
+      </div>
+      
+      <div style="display: flex; flex-direction: column; gap: 2px" id="statcast-chart">
+
+      </div>
+    </div>
+
+    <div id="right-side">
+      <img src="logo.png" id="logo-image" height="250" />
+
+      <div style="display: flex; flex-direction: column; gap: 10px; text-align: right;">
+        <span style="
+          font-size: 30px;
+          font-weight: bold;
+          text-decoration: underline;
+          
+        ">Chart Abbreviations</span>
+        <span style="font-size: 22px; font-weight: bold"
+          ><span style="font-style: italic">*BA: </span><span style="font-weight: normal">Batting Average</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          ><span style="font-style: italic">*AB: </span><span style="font-weight: normal">At Bats</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          ><span style="font-style: italic">*H: </span><span style="font-weight: normal">Hits</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          ><span style="font-style: italic">*T: </span><span style="font-weight: normal">Takes</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          ><span style="font-style: italic">*RBI: </span><span style="font-weight: normal">Runs Batted In</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          ><span style="font-style: italic">*BB: </span><span style="font-weight: normal">Walks</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          ><span style="font-style: italic">*S/M: </span><span style="font-weight: normal">Strikeouts</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          ><span style="font-style: italic">*K: </span><span style="font-weight: normal">Strikeouts Missing</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          ><span style="font-style: italic">*ꓘ: </span><span style="font-weight: normal">Strikeouts Looking</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          ><span style="font-style: italic">*IZ: </span><span style="font-weight: normal">In the Zone</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          ><span style="font-style: italic">*OZ: </span><span style="font-weight: normal">Out the Zone</span></span
+        ></span>
+      </div>
+      
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px; text-align: right;">
+        <span style="
+          font-size: 30px;
+          font-weight: bold;
+          text-decoration: underline
+        ">Yvette's Statcast</span>
+
+        <span style="font-size: 22px; font-weight: normal"
+          >(194 Pitches)</span
+        ></span>
+        
+        <span style="font-size: 22px; font-weight: bold"
+          >AB: <span style="font-weight: normal">74</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          >H: <span style="font-weight: normal">51</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          >T: <span style="font-weight: normal">130 (73-IZ/57-OZ)</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          >RBI: <span style="font-weight: normal">15</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          >BB: <span style="font-weight: normal">2</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          >K: <span style="font-weight: normal">2</span></span
+        ></span>
+        <span style="font-size: 22px; font-weight: bold"
+          >ꓘ: <span style="font-weight: normal">2</span></span
+        ></span>
+      </div>
+    </div>
+
+    <script>
+      // Statcast chart
+      const statcastChartData = {
+        "y0x0": [
+          {
+            "hits": 1,
+            "takes": 0,
+            "kmiss": 2,
+            "klooking": 0,
+            "color": "black"
+          },
+          {
+            "hits": 0,
+            "takes": 1,
+            "kmiss": 0,
+            "klooking": 3,
+            "color": "red"
+          },
+          {
+            "hits": 2,
+            "takes": 0,
+            "kmiss": 1,
+            "klooking": 0,
+            "color": "green"
+          },
+          {
+            "hits": 0,
+            "takes": 0,
+            "kmiss": 0,
+            "klooking": 1,
+            "color": "blue"
+          },
+        ],
+        "y0x1": [
+          {
+            "hits": 0,
+            "takes": 2,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "black"
+          },
+          {
+            "hits": 1,
+            "takes": 0,
+            "kmiss": 0,
+            "klooking": 2,
+            "color": "red"
+          },
+          {
+            "hits": 0,
+            "takes": 1,
+            "kmiss": 3,
+            "klooking": 0,
+            "color": "green"
+          },
+          {
+            "hits": 2,
+            "takes": 0,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "blue"
+          },
+        ],
+        "y0x2": [
+          {
+            "hits": 0,
+            "takes": 1,
+            "kmiss": 0,
+            "klooking": 2,
+            "color": "black"
+          },
+        ],
+        "y0x3": [
+          {
+            "hits": 1,
+            "takes": 0,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "black"
+          },
+        ],
+        "y0x4": [
+          {
+            "hits": 0,
+            "takes": 0,
+            "kmiss": 1,
+            "klooking": 2,
+            "color": "black"
+          },
+        ],
+        "y1x0": [
+          {
+            "hits": 2,
+            "takes": 0,
+            "kmiss": 0,
+            "klooking": 1,
+            "color": "black"
+          },
+          {
+            "hits": 0,
+            "takes": 3,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "red"
+          },
+          {
+            "hits": 1,
+            "takes": 0,
+            "kmiss": 2,
+            "klooking": 0,
+            "color": "green"
+          },
+          {
+            "hits": 0,
+            "takes": 0,
+            "kmiss": 0,
+            "klooking": 1,
+            "color": "blue"
+          },
+        ],
+        "y1x1": [
+          {
+            "hits": 0,
+            "takes": 1,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "black"
+          },
+          {
+            "hits": 2,
+            "takes": 0,
+            "kmiss": 1,
+            "klooking": 0,
+            "color": "red"
+          },
+          {
+            "hits": 0,
+            "takes": 0,
+            "kmiss": 0,
+            "klooking": 3,
+            "color": "green"
+          },
+          {
+            "hits": 1,
+            "takes": 2,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "blue"
+          },
+        ],
+        "y1x2": [
+          {
+            "hits": 0,
+            "takes": 0,
+            "kmiss": 1,
+            "klooking": 0,
+            "color": "black"
+          },
+        ],
+        "y1x3": [
+          {
+            "hits": 2,
+            "takes": 0,
+            "kmiss": 0,
+            "klooking": 1,
+            "color": "black"
+          },
+        ],
+        "y1x4": [
+          {
+            "hits": 0,
+            "takes": 1,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "black"
+          },
+        ],
+        "y2x0": [
+          {
+            "hits": 0,
+            "takes": 0,
+            "kmiss": 2,
+            "klooking": 0,
+            "color": "black"
+          },
+        ],
+        "y2x1": [
+          {
+            "hits": 1,
+            "takes": 0,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "black"
+          },
+        ],
+        "y2x2": [
+          {
+            "hits": 0,
+            "takes": 2,
+            "kmiss": 0,
+            "klooking": 1,
+              "color": "black"
+          },
+        ],
+        "y2x3": [
+          {
+            "hits": 0,
+            "takes": 0,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "black"
+          },
+        ],
+        "y2x4": [
+          {
+            "hits": 1,
+            "takes": 0,
+            "kmiss": 2,
+            "klooking": 0,
+            "color": "black"
+          },
+        ],
+        "y3x0": [
+          {
+            "hits": 0,
+            "takes": 1,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "black"
+          },
+        ],
+        "y3x1": [
+          {
+            "hits": 0,
+            "takes": 0,
+            "kmiss": 1,
+            "klooking": 2,
+            "color": "red"
+          },
+        ],
+        "y3x2": [
+          {
+            "hits": 3,
+            "takes": 0,
+            "kmiss": 0,
+            "klooking": 1,
+            "color": "green"
+          },
+        ],
+        "y3x3": [
+          {
+            "hits": 0,
+            "takes": 2,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "black"
+          },
+        ],
+        "y3x4": [
+          {
+            "hits": 1,
+            "takes": 0,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "blue"
+          },
+        ],
+        "y4x0": [
+          {
+            "hits": 0,
+            "takes": 0,
+            "kmiss": 2,
+            "klooking": 1,
+            "color": "black"
+          },
+        ],
+        "y4x1": [
+          {
+            "hits": 0,
+            "takes": 1,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "blue"
+          },
+        ],
+        "y4x2": [
+          {
+            "hits": 2,
+            "takes": 0,
+            "kmiss": 0,
+            "klooking": 1,
+            "color": "blue"
+          },
+        ],
+        "y4x3": [
+          {
+            "hits": 0,
+            "takes": 0,
+            "kmiss": 1,
+            "klooking": 0,
+            "color": "blue"
+          },
+        ],
+        "y4x4": [
+          {
+            "hits": 0,  
+            "takes": 3,
+            "kmiss": 0,
+            "klooking": 0,
+            "color": "blue"
+          },
+        ],
+      };
+
+      // Create statcast chart
+      statcastChart = document.getElementById("statcast-chart");
+      let innerHTML = "";
+      for (let y=0;y<5;y++) {
+        innerHTML += `
+          <div style="display: flex; flex-direction: row; gap: 2px">
+        `;
+        for (let x=0;x<5;x++) {
+          innerHTML += `
+            <div style="
+              width: 96px;
+              height: 96px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              flex-direction: column;
+              ${x%4 !== 0 && y%4 !== 0 ? "background-color: #ddd" : ""}
+            ">
+          `;
+          for (let i=0;i<statcastChartData[`y${y}x${x}`].length;i++) {
+            const data = statcastChartData[`y${y}x${x}`][i];
+            let dtxt = [];
+            if (data.hits !== 0) dtxt.push(`${data.hits}H`);
+            if (data.takes !== 0) dtxt.push(`${data.takes}t`);
+            if (data.kmiss !== 0) dtxt.push(`${data.kmiss}K`);
+            if (data.klooking !== 0) dtxt.push(`${data.klooking}ꓘ`);
+
+            innerHTML += `
+              <span style="color:${data.color}">
+                ${dtxt.join(", ")}
+              </span>
+            `;
+          }
+          innerHTML += `</div>`;
+        }
+        innerHTML += `</div>`;
+      }
+      statcastChart.innerHTML = innerHTML;
+
+      class HeatmapApp {
+        constructor() {
+          this.canvas = document.getElementById("heatmap-canvas");
+          this.ctx = this.canvas.getContext("2d");
+          this.width = this.canvas.width;
+          this.height = this.canvas.height;
+
+          // Grid configuration
+          this.gridSize = 3;
+          this.gridCellSize = 80; // Size of each grid cell
+          this.gridLineWidth = 2;
+          this.gridStartX =
+            (this.width - this.gridSize * this.gridCellSize) / 2;
+          this.gridStartY =
+            (this.height - this.gridSize * this.gridCellSize) / 2;
+
+          // Heatmap data - stores intensity values for each pixel
+          this.heatData = new Array(this.width * this.height).fill(0);
+          this.pitchCountData = new Array(this.width * this.height).fill(0);
+          this.clickIntensity = 5;
+          this.maxIntensity = 10;
+
+          this.init();
+        }
+
+        init() {
+          this.drawBackground();
+          this.drawGrid();
+          this.setupEventListeners();
+        }
+
+        drawBackground() {
+          this.ctx.fillStyle = "white";
+          this.ctx.fillRect(0, 0, this.width, this.height);
+        }
+
+        drawGrid() {
+          this.ctx.strokeStyle = "black";
+          this.ctx.lineWidth = this.gridLineWidth;
+
+          // Draw vertical lines
+          for (let i = 0; i <= this.gridSize; i++) {
+            const x = this.gridStartX + i * this.gridCellSize;
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, this.gridStartY);
+            this.ctx.lineTo(
+              x,
+              this.gridStartY + this.gridSize * this.gridCellSize
+            );
+            this.ctx.stroke();
+          }
+
+          // Draw horizontal lines
+          for (let i = 0; i <= this.gridSize; i++) {
+            const y = this.gridStartY + i * this.gridCellSize;
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.gridStartX, y);
+            this.ctx.lineTo(
+              this.gridStartX + this.gridSize * this.gridCellSize,
+              y
+            );
+            this.ctx.stroke();
+          }
+        }
+
+        setupEventListeners() {
+          this.canvas.addEventListener("click", (e) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const x = Math.floor(e.clientX - rect.left);
+            const y = Math.floor(e.clientY - rect.top);
+            this.addHeat(x, y);
+          });
+          document.addEventListener("keydown", (e) => {
+            if (e.key === "z") {
+              decreaseIntensity();
+            } else if (e.key === "x") {
+              increaseIntensity();
+            }
+          });
+        }
+
+        addHeat(centerX, centerY) {
+          // Add heat in a circular area around the click point
+          const radius = 1; // Radius of heat effect
+          const falloffRadius = 128; // Radius where effect fades to zero
+
+          for (
+            let x = Math.max(0, centerX - falloffRadius);
+            x <= Math.min(this.width - 1, centerX + falloffRadius);
+            x++
+          ) {
+            for (
+              let y = Math.max(0, centerY - falloffRadius);
+              y <= Math.min(this.height - 1, centerY + falloffRadius);
+              y++
+            ) {
+              const distance = Math.sqrt(
+                (x - centerX) ** 2 + (y - centerY) ** 2
+              );
+
+              if (distance <= falloffRadius) {
+                // Calculate intensity using sigmoid falloff pattern
+                let intensity;
+                if (distance <= radius) {
+                  intensity = this.clickIntensity;
+                } else {
+                  // Sigmoid falloff: slow-fast-slow transition
+                  const normalizedDistance =
+                    1 - (distance - radius) / (falloffRadius - radius);
+                  intensity =
+                    this.clickIntensity * Math.pow(normalizedDistance, 3);
+                }
+
+                const index = y * this.width + x;
+                this.heatData[index] = Math.max(
+                  -this.maxIntensity,
+                  Math.min(this.maxIntensity, this.heatData[index] + intensity)
+                );
+                this.pitchCountData[index] = Math.max(
+                  0, this.pitchCountData[index] + Math.abs(intensity)
+                );
+              }
+            }
+          }
+
+          this.redraw();
+        }
+
+        hsvToRgb(h, s, v) {
+          // Convert HSV to RGB
+          // h: hue (0-360 degrees), s: saturation (0-1), v: value/brightness (0-1)
+          // Returns [r, g, b] where each component is 0-255
+
+          // Normalize hue to 0-360 range
+          h = h % 360;
+          if (h < 0) h += 360;
+
+          const c = v * s; // Chroma
+          const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+          const m = v - c;
+
+          let r, g, b;
+
+          if (h >= 0 && h < 60) {
+            r = c;
+            g = x;
+            b = 0;
+          } else if (h >= 60 && h < 120) {
+            r = x;
+            g = c;
+            b = 0;
+          } else if (h >= 120 && h < 180) {
+            r = 0;
+            g = c;
+            b = x;
+          } else if (h >= 180 && h < 240) {
+            r = 0;
+            g = x;
+            b = c;
+          } else if (h >= 240 && h < 300) {
+            r = x;
+            g = 0;
+            b = c;
+          } else {
+            r = c;
+            g = 0;
+            b = x;
+          }
+
+          return [
+            Math.round((r + m) * 255),
+            Math.round((g + m) * 255),
+            Math.round((b + m) * 255),
+          ];
+        }
+
+        redraw() {
+          // Clear and redraw background
+          this.drawBackground();
+
+          // Draw heatmap
+          const imageData = this.ctx.createImageData(this.width, this.height);
+          const data = imageData.data;
+
+          for (let i = 0; i < this.heatData.length; i++) {
+            const heat = this.heatData[i];
+            const pitch_count = Math.max(0, Math.min(1, this.pitchCountData[i] / 10));
+            const pixelIndex = i * 4;
+
+            if (heat > 0) {
+              // Convert heat to red color intensity
+              const intensity = Math.max(
+                -1,
+                Math.min(1, heat / this.maxIntensity)
+              );
+
+              const [red, green, blue] = this.hsvToRgb(
+                (1 - intensity) * 90,
+                pitch_count,
+                1
+              );
+
+              data[pixelIndex] = red; // Red
+              data[pixelIndex + 1] = green; // Green
+              data[pixelIndex + 2] = blue; // Blue
+              data[pixelIndex + 3] = 255; // Alpha
+            } else if (heat < 0) {
+              // Convert coolness to blue color intensity
+              const intensity = Math.max(
+                -1,
+                Math.min(1, heat / this.maxIntensity)
+              );
+
+              const [red, green, blue] = this.hsvToRgb(
+                -intensity * 90 + 90,
+                pitch_count,
+                1
+              );
+
+              data[pixelIndex] = red; // Red
+              data[pixelIndex + 1] = green; // Green
+              data[pixelIndex + 2] = blue; // Blue
+              data[pixelIndex + 3] = 255; // Alpha
+            } else {
+              // White background
+              data[pixelIndex] = 255; // Red
+              data[pixelIndex + 1] = 255; // Green
+              data[pixelIndex + 2] = 255; // Blue
+              data[pixelIndex + 3] = 255; // Alpha
+            }
+          }
+
+          this.ctx.putImageData(imageData, 0, 0);
+
+          // Apply blur effect for smooth transitions
+          this.ctx.filter = "blur(2px)";
+          this.ctx.drawImage(this.canvas, 0, 0);
+          this.ctx.filter = "none";
+
+          // Redraw grid on top
+          this.drawGrid();
+        }
+
+        clear() {
+          this.heatData.fill(0);
+          this.drawBackground();
+          this.drawGrid();
+        }
+
+        setIntensity(intensity) {
+          this.clickIntensity = Math.max(-5, Math.min(5, intensity));
+          document.getElementById("intensity-value").textContent =
+            this.clickIntensity.toFixed(1);
+        }
+      }
+
+      // Initialize the app
+      let heatmapApp;
+      window.addEventListener("load", () => {
+        heatmapApp = new HeatmapApp();
+      });
+
+      // Control functions
+      function clearHeatmap() {
+        if (heatmapApp) {
+          heatmapApp.clear();
+        }
+      }
+
+      function increaseIntensity() {
+        if (heatmapApp) {
+          heatmapApp.setIntensity(heatmapApp.clickIntensity + 10);
+        }
+      }
+
+      function decreaseIntensity() {
+        if (heatmapApp) {
+          heatmapApp.setIntensity(heatmapApp.clickIntensity - 10);
+        }
+      }
+    </script>
+  </body>
+</html>

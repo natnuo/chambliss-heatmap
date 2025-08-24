@@ -1,0 +1,52 @@
+---
+globs: *.html,*.css
+---
+
+# UI/UX Standards for Heatmap Application
+
+## Visual Design Requirements
+
+- **Background**: Pure white (#ffffff)
+- **Grid lines**: Pure black (#000000) with 2px width
+- **Heat colors**: Red gradient from white to full red
+- **Typography**: Arial, sans-serif for clean readability
+
+## User Interface Elements
+
+### Canvas Area
+- 600x600px canvas with crosshair cursor
+- Subtle border and shadow for definition
+- Rounded corners (8px border-radius)
+
+### Control Panel
+- Horizontal layout below canvas
+- Clear button with primary blue styling (#007bff)
+- Intensity controls with +/- buttons
+- Real-time intensity value display
+
+### Interactive Feedback
+- Crosshair cursor over canvas area
+- Hover effects on buttons (darker blue #0056b3)
+- Smooth transitions (0.3s duration)
+- Visual intensity indicator
+
+## Responsive Design
+
+- Center-aligned layout with flexbox
+- Minimum viewport height (100vh)
+- Consistent spacing (20px margins, 15px gaps)
+- Mobile-friendly button sizes (minimum 44px touch targets)
+
+## Accessibility Considerations
+
+- Proper semantic HTML structure
+- Descriptive button text
+- Color contrast compliance
+- Keyboard navigation support where applicable
+
+## Information Architecture
+
+- Clear heading hierarchy
+- Instructional text below controls
+- Intuitive control grouping
+- Visual hierarchy with typography and spacing

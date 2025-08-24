@@ -1,0 +1,60 @@
+---
+description: "Heatmap visualization algorithms and mathematical formulas"
+---
+
+# Heatmap Visualization Algorithms
+
+## Heat Distribution Formula
+
+When a user clicks at coordinates (centerX, centerY), apply heat using radial distribution:
+
+```javascript
+const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+```
+
+## Intensity Calculation
+
+- **Core radius**: Full intensity within 30 pixels
+- **Falloff radius**: Effect fades to zero at 60 pixels
+- **Falloff pattern**: Sigmoid curve for natural slow-fast-slow transition
+
+### Sigmoid Falloff Formula
+
+```javascript
+sigmoidFalloff(t) {
+    const steepness = 8; // Controls transition steepness
+    const scaledT = (t - 0.5) * steepness;
+    const sigmoid = 1 / (1 + Math.exp(scaledT));
+    return Math.max(0, Math.min(1, sigmoid));
+}
+```
+
+Where `t` is normalized distance from 0 (radius edge) to 1 (falloff edge)
+
+## Color Mapping
+
+Convert heat values to RGB colors:
+- **Red channel**: `Math.floor(255 * intensity)`
+- **Green channel**: `Math.floor(255 * (1 - intensity * 0.8))`
+- **Blue channel**: `Math.floor(255 * (1 - intensity * 0.9))`
+
+## Blur Implementation
+
+Apply blur effects using:
+1. Canvas filter: `ctx.filter = 'blur(2px)'`
+2. Redraw canvas onto itself for smooth blending
+3. Reset filter before drawing grid overlay
+
+## Data Structure
+
+- Use 1D array for heat data: `new Array(width * height).fill(0)`
+- Index calculation: `index = y * width + x`
+- Clamp intensity values: `Math.min(maxIntensity, currentHeat + newHeat)`
+
+## Grid Specifications
+
+- **Grid size**: 3x3 cells
+- **Cell size**: 180px per cell
+- **Line width**: 2 pixels
+- **Canvas size**: 600x600px
+- **Grid centering**: `(canvasSize - gridSize * cellSize) / 2`

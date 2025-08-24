@@ -1,0 +1,56 @@
+---
+description: "Testing and validation procedures for the heatmap application"
+---
+
+# Testing and Validation Procedures
+
+## Functional Testing Checklist
+
+### Core Functionality
+- [ ] Canvas renders 3x3 grid with black 2px lines on white background
+- [ ] Click detection works across entire canvas area
+- [ ] Heat accumulates with each click (pixels get redder)
+- [ ] Blur effect creates smooth color transitions
+- [ ] Clear button resets heatmap to original state
+
+### Interactive Controls
+- [ ] Intensity +/- buttons modify click strength
+- [ ] Intensity value updates in real-time
+- [ ] Intensity bounds are respected (0.1 to 5.0 range)
+- [ ] Controls remain responsive after multiple interactions
+
+### Visual Validation
+- [ ] Grid lines remain crisp and visible over heatmap
+- [ ] Heat distribution follows radial pattern
+- [ ] Color gradients are smooth and natural
+- [ ] No visual artifacts or rendering glitches
+- [ ] Pixels within same grid cell can have different colors
+
+## Browser Compatibility
+
+Test in major browsers:
+- Chrome/Edge (Chromium-based)
+- Firefox
+- Safari (if available)
+
+## Performance Testing
+
+- [ ] Smooth interaction with rapid clicking
+- [ ] No memory leaks during extended use
+- [ ] Canvas redraws efficiently
+- [ ] Blur effects don't cause lag
+
+## Edge Cases
+
+- [ ] Clicking at canvas edges
+- [ ] Maximum heat intensity reached
+- [ ] Rapid successive clicks
+- [ ] Window resize behavior
+- [ ] Mobile touch interactions (if applicable)
+
+## Code Quality Checks
+
+- [ ] No console errors or warnings
+- [ ] Clean HTML validation
+- [ ] Proper event listener cleanup
+- [ ] Efficient pixel manipulation algorithms

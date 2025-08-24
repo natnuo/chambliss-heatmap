@@ -1,0 +1,41 @@
+---
+globs: *.html
+---
+
+# HTML Development Guidelines for Heatmap Application
+
+## Code Organization
+
+- Keep all code in a single HTML file for simplicity
+- Use semantic HTML structure with proper sections
+- Inline CSS and JavaScript are acceptable for this project size
+- Maintain clean separation between HTML structure, CSS styling, and JavaScript logic
+
+## Canvas Implementation Standards
+
+- Use HTML5 Canvas for pixel-level manipulation
+- Implement proper event handling for mouse interactions
+- Use `getContext('2d')` for 2D rendering operations
+- Handle canvas coordinate transformations correctly
+
+## JavaScript Class Structure
+
+- Use ES6 class syntax for the main `HeatmapApp` class
+- Implement proper initialization in constructor
+- Use descriptive method names like `addHeat()`, `redraw()`, `drawGrid()`
+- Handle pixel data with typed arrays when possible
+
+## Visual Requirements
+
+- White background (`background-color: white`)
+- Black grid lines with 2-pixel width
+- 3x3 grid layout with equal cell sizes
+- Red heat gradient using RGB color manipulation
+- Blur effects using canvas filters or manual convolution
+
+## Performance Considerations
+
+- Optimize pixel manipulation using ImageData
+- Minimize canvas redraws
+- Use efficient algorithms for radial heat distribution
+- Apply blur effects judiciously to maintain performance
